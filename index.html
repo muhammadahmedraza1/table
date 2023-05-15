@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>table</title>
+  <meta name="robots" content="noindex">
+  <link href="vendor/fonts/fonts.css" rel="stylesheet" />
+  <link href="vendor/font-awsome/all.css" rel="stylesheet" />
+  <link href="vendor/datatable/datatables.min.css" rel="stylesheet" />
+  <style>
+    .table-responsive {
+      margin-bottom: 0;
+    }
+
+    .table-responsive {
+      display: block;
+      width: 100%;
+      font-size: .8125rem;
+      font-family: Poppins;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    label {
+      margin-bottom: 0.5rem;
+    }
+
+    label {
+      font-weight: 500;
+    }
+
+    label {
+      display: inline-block;
+    }
+
+    [dir] button,
+    [dir] input,
+    [dir] optgroup,
+    [dir] select,
+    [dir] textarea {
+      margin: 0;
+    }
+
+    select {
+      word-wrap: normal;
+    }
+
+    button,
+    input,
+    optgroup,
+    select,
+    textarea {
+      /* font-family: inherit; */
+      font-family: Poppins;
+      font-size: inherit;
+      line-height: inherit;
+    }
+
+    select {
+      word-wrap: normal;
+    }
+
+    .dataTables_filter {
+      margin-bottom: 1rem;
+    }
+
+    .table {
+      margin-bottom: 1rem;
+    }
+
+    .table-bordered {
+      border: 1px solid #dee2e6;
+    }
+
+    .table {
+      width: 100%;
+      color: #272c33;
+    }
+
+    table thead tr {
+      background-color: #303840;
+    }
+
+    [dir] .table thead th {
+      /* padding: 0.5rem 0.75rem; */
+      padding: 0.75rem;
+    }
+
+    [dir] .table thead th {
+      border-bottom: 2px solid #e9edf2;
+    }
+
+    .table thead th {
+      font-size: .8125rem;
+    }
+
+    .table thead th {
+      color: #272c33;
+      text-transform: uppercase;
+      /* font-family: Exo\ 2, Helvetica Neue, Arial, sans-serif; */
+      font-family: Poppins;
+      font-weight: 600;
+      letter-spacing: 2px;
+    }
+
+    .table tbody td,
+    .table thead th {
+      vertical-align: middle;
+      line-height: 1.2;
+    }
+
+    [dir] th {
+      text-align: inherit;
+      text-align: -webkit-match-parent;
+    }
+
+    table thead tr th {
+      color: #fff !important;
+    }
+
+    [dir] .table-striped tbody tr:nth-of-type(odd) {
+      background-color: rgba(39, 44, 51, .05);
+    }
+
+    .table tbody td {
+      padding: 0.5rem;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+      background: #fff !important;
+      color: black;
+      border: 1px solid #d9534f !important;
+    }
+  </style>
+</head>
+
+<body class="">
+  <div class="container-fluid mt-3 pb-5">
+    <div class="row">
+      <div class="col-12">
+        <div class="table-responsive">
+          <table id="gridTaskContainer" class="table table-bordered table-striped">
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="vendor/bootstrap/popper.min.js"></script>
+  <script src="vendor/bootstrap/bootstrap.min.js"></script>
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/datatable/datatables.min.js"></script>
+  <script src="/assets/vendor/tables/check-selected-row.js"></script>
+  <script src="vendor/font-awsome/font-awsome-all.js"></script>
+  <script>
+    $(document).ready(function () {
+     
+     getdata('https://workflowuat.cclpharma.online/WorkflowUATApi/api/Dashboard/GetMyOverdueRequestsByUserId?userId=8370');
+    });    
+  function getdata(url){
+  
+    $.ajax({
+            type: "GET",
+            contentType: "application/json;charset=utf-8",
+            url:url,
+            success: function (response)
+            {
+              var my_columns = [];
+              var my_data = [];
+              $.each( response.data[0], function( key, value ) {
+                      var my_item = {};
+                      my_item.data = key;
+                      my_item.title = key.replace(/_/g, ' ');;
+                      my_columns.push(my_item);
+              });
+              $.each( response.data, function( key, value ) {
+                      var formatedObj = convertObj(value);
+                      my_data.push(formatedObj);
+              });  
+
+              $('#gridTaskContainer').DataTable({
+                 data: my_data,
+                "columns": my_columns
+              });
+            
+            },
+            error: function (error) {
+                console.log(error);
+            },
+            cache: false,
+            async: false,
+        });
+     
+      function convertObj(obj){
+        var formatedobj = {};
+        $.each(obj, function(key, value) {
+            value = convertDateFormat(value);
+            formatedobj[key] = value;
+        });
+       return formatedobj;
+      }
+      function convertDateFormat(value){
+
+            if (typeof value === "string")
+              {
+                // Check if the string matches a date format
+                var regex = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(?:\.\d+)?Z?/gm;
+                if (value.match(regex)) {
+
+                  var fullDatestart = new Date(value);
+                  var twoDigitMonthstart = (fullDatestart.getMonth() + 1) + "";
+                  if (twoDigitMonthstart.length == 1)
+                      twoDigitMonthstart = "0" + twoDigitMonthstart;
+
+                  var twoDigitDatestart = fullDatestart.getDate() + "";
+                  if (twoDigitDatestart.length == 1)
+                      twoDigitDatestart = "0" + twoDigitDatestart;
+
+                  let formatedDate = fullDatestart.getFullYear()  + "-" + twoDigitMonthstart + "-" + twoDigitDatestart;
+                  // If the string matches a date format, it is likely a date property
+                  value = formatedDate;
+                }
+              }             
+            return value;
+      }
+    }
+  </script>
+</body>
+
+</html>
